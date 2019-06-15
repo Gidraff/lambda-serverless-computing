@@ -1,0 +1,27 @@
+service: lambda-serverless-computing # your service name
+#app: your-app-name
+#tenant: your-tenant-name
+
+custom: 
+  secrets: ${file(secrets.json)} # load secrets.json file
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: production
+  region: us-east-1
+  environment: # environment property
+    NODE_ENV: ${self:custom.secrets.NODE_ENV}
+
+functions:
+  app:
+    handler: app.server # reference the file and exported method
+    events: # events trigger lambda functions execution
+      - http: # this is an API Gateway HTTP event trigger
+          path: /
+          method: ANY
+          cors: true
+      - http: # All routes get proxied to the express router
+          path: /{proxy+}
+          method: ANY 
+          cors: true
